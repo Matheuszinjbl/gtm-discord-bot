@@ -138,3 +138,4 @@ client.on("messageDelete", async (message) => {
 
 // ============ START ============
 client.login(BOT_TOKEN);
+ 
