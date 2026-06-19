@@ -1,0 +1,16 @@
+{
+  "name": "gtm-discord-bot",
+  "version": "1.0.0",
+  "description": "Bot do Discord da GTM — envia eventos das salas para o site",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.18.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
