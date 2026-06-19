@@ -135,5 +135,6 @@ client.on("messageDelete", async (message) => {
     timestamp: new Date().toISOString(),
   });
 });
+
 // ============ START ============
 client.login(BOT_TOKEN);
