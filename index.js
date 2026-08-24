@@ -46,6 +46,12 @@ client.once("clientReady", () => {
   console.log(`👁️ Monitorando salas:`, Object.entries(CHANNELS).filter(([,v]) => v).map(([k]) => k));
   console.log(`🎖️ Cargos da hierarquia: ${HIERARCHY_ROLE_IDS.length ? HIERARCHY_ROLE_IDS.join(", ") : "todos os cargos"}`);
   if (CHANNEL_PONTO_ID) console.log(`🕒 Monitorando sala de ponto: ${CHANNEL_PONTO_ID} → ${PONTO_WEBHOOK_URL}`);
+  console.log(`🏠 Servidores em que o bot está:`, client.guilds.cache.map((g) => `${g.name} (${g.id})`).join(" | ") || "nenhum");
+  if (CHANNEL_PONTO_ID) {
+    client.channels.fetch(CHANNEL_PONTO_ID)
+      .then((ch) => console.log(`✅ Canal de ponto acessível: #${ch?.name} em "${ch?.guild?.name}"`))
+      .catch((e) => console.error(`❌ Não consigo acessar o canal de ponto (${CHANNEL_PONTO_ID}): ${e.message}`));
+  }
   // Sincroniza membros sem travar o boot do bot
   syncAllMembers().catch((e) => console.error("❌ Sync inicial falhou:", e.message));
   setInterval(() => syncAllMembers().catch((e) => console.error("❌ Sync periódico falhou:", e.message)), 10 * 60 * 1000);
@@ -109,8 +115,14 @@ async function sendPonto(lines, rebuild = false) {
 client.on("messageCreate", async (message) => {
   if (!CHANNEL_PONTO_ID || message.channel.id !== CHANNEL_PONTO_ID) return;
   const lines = extractPontoLines(message);
-  if (lines.length) await sendPonto(lines);
+  console.log(`🕒 [ponto] mensagem recebida (${message.id}) — ${lines.length} linha(s) reconhecida(s)`);
+  if (lines.length === 0) {
+    console.log(`🔎 [ponto] conteúdo bruto: ${JSON.stringify(message.content).slice(0, 500)} | embeds: ${(message.embeds || []).length}`);
+    return;
+  }
+  await sendPonto(lines);
 });
+
 
 // A sala #ponto costuma ser atualizada por edição da mesma mensagem
 client.on("messageUpdate", async (_old, newMsg) => {
