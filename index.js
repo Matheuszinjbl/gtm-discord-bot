@@ -61,14 +61,21 @@ client.once("clientReady", () => {
 });
 
 // ============ PONTO: PARSE E ENVIO ============
-const PONTO_RE = /^(.*?)\s*\((\d{1,8})\)\s*=>\s*Data:\s*(\d{1,2})\/(\d{1,2})\/(\d{4})\s*\|\s*(ENTRADA|SA[IÍ]DA)\s*:?\s*(\d{1,2}):(\d{1,2}):(\d{1,2})/i;
+const PONTO_RE = /^(.*?)\s*\((\d{1,8})\)\s*(?:=>?|→|-)?\s*Data:\s*(\d{1,2})\/(\d{1,2})\/(\d{4})\s*\|\s*(ENTRADA|SA[IÍ]DA)\s*:?\s*(\d{1,2}):(\d{1,2}):(\d{1,2})/i;
 
 function saoPauloToUtcIso(d, mo, y, hh, mi, ss) {
   return new Date(Date.UTC(y, mo - 1, d, hh + 3, mi, ss)).toISOString();
 }
 
 function parsePontoLine(raw) {
-  const line = String(raw || "").replace(/[*_`>]/g, "").replace(/<[^>]+>/g, "").trim();
+  // remove emojis customizados/menções (<...>) antes da limpeza de markdown,
+  // senão o ">" de "=>" é apagado e a linha deixa de casar
+  const line = String(raw || "")
+    .replace(/<[^>\s][^>]*>/g, "")
+    .replace(/^\s*>+\s*/g, "")
+    .replace(/[*_`~]/g, "")
+    .replace(/:[a-z][a-z0-9_]*:/gi, "")
+    .trim();
   const m = line.match(PONTO_RE);
   if (!m) return null;
   const [, name, gameId, dd, mo, yyyy, kind, hh, mi, ss] = m;
